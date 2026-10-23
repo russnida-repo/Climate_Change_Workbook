@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Climate Change Analysis 2</title>
+<meta name="description" content="Global temperature against CO2 with natural-variability controls. An auditable spreadsheet analysis with reproduction scripts.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fbfcfd;
+  --paper-2:#f2f5f7;
+  --ink:#10161b;
+  --ink-2:#4a5560;
+  --ink-3:#6b7680;
+  --rule:#d8e0e6;
+  --rule-2:#eceff2;
+  /* the workbook's own cell conventions: blue = computed outside and pasted,
+     amber = hand-maintained input. Same meaning here. */
+  --computed:#1a5fb4;
+  --input:#9a6300;
+  --open:#a5272c;
+  --measure:68ch;
+}
+:root:not([data-theme="light"]) { color-scheme: light; }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0f141a;
+    --paper-2:#161d25;
+    --ink:#e6ecf1;
+    --ink-2:#a3b0bc;
+    --ink-3:#7d8b98;
+    --rule:#2a343f;
+    --rule-2:#1d252e;
+    --computed:#7cb0f0;
+    --input:#d9a441;
+    --open:#f08a8f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0f141a; --paper-2:#161d25; --ink:#e6ecf1; --ink-2:#a3b0bc;
+  --ink-3:#7d8b98; --rule:#2a343f; --rule-2:#1d252e;
+  --computed:#7cb0f0; --input:#d9a441; --open:#f08a8f; color-scheme: dark;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Public Sans","Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;
+  font-size:17px;
+  line-height:1.6;
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+
+/* ---------- masthead ---------- */
+header.top{border-bottom:1px solid var(--rule);padding:56px 0 30px}
+.eyebrow{
+  font-size:14px;color:var(--ink-3);margin:0 0 14px;
+  font-weight:400;letter-spacing:0;
+}
+.eyebrow a{color:var(--ink-3)}
+h1{
+  font-size:clamp(30px,4.4vw,46px);
+  line-height:1.12;font-weight:700;letter-spacing:-0.022em;
+  margin:0 0 16px;max-width:19ch;
+}
+.lede{font-size:19px;line-height:1.55;color:var(--ink-2);max-width:var(--measure);margin:0 0 22px}
+.facts{
+  display:flex;flex-wrap:wrap;gap:8px 26px;
+  font-size:14.5px;color:var(--ink-3);margin:0;padding:0;list-style:none;
+}
+.facts b{font-weight:500;color:var(--ink-2)}
+
+/* ---------- sections ---------- */
+section{padding:46px 0;border-bottom:1px solid var(--rule-2)}
+section:last-of-type{border-bottom:0}
+h2{
+  font-size:25px;font-weight:600;letter-spacing:-0.014em;
+  margin:0 0 6px;max-width:30ch;
+}
+.sub{color:var(--ink-2);max-width:var(--measure);margin:0 0 26px;font-size:16.5px}
+p{max-width:var(--measure)}
+a{color:var(--computed);text-decoration-thickness:1px;text-underline-offset:2px}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:2px solid var(--computed);outline-offset:2px;border-radius:2px}
+
+/* ---------- tables ---------- */
+.tbl{width:100%;overflow-x:auto;margin:0 0 10px;
+     -webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:15px;min-width:640px}
+caption{
+  text-align:left;font-size:15px;color:var(--ink-2);
+  padding:0 0 10px;max-width:var(--measure);
+}
+th,td{
+  text-align:left;padding:9px 14px 9px 0;
+  border-bottom:1px solid var(--rule-2);vertical-align:baseline;
+}
+thead th{
+  font-weight:600;font-size:13.5px;color:var(--ink-2);
+  border-bottom:1px solid var(--rule);padding-bottom:8px;
+}
+tbody tr:last-child td{border-bottom:1px solid var(--rule)}
+.num{text-align:right;padding-right:22px;white-space:nowrap;font-weight:500}
+th.num{text-align:right}
+.src{
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-size:12.5px;color:var(--ink-3);white-space:nowrap;
+}
+.note-row td{color:var(--ink-2);font-size:14px;padding-top:12px;border-bottom:0}
+tbody.grp th{
+  font-weight:600;font-size:13px;color:var(--ink-3);
+  padding-top:20px;padding-bottom:6px;border-bottom:1px solid var(--rule-2);
+}
+.q{color:var(--ink-2)}
+.hl td{font-weight:600}
+.hl .num{color:var(--computed)}
+.open{color:var(--open)}
+.dash{color:var(--ink-3)}
+
+/* provenance key */
+.key{
+  display:flex;flex-wrap:wrap;gap:10px 22px;margin:18px 0 0;padding:0;
+  list-style:none;font-size:14px;color:var(--ink-2);
+}
+.key li{display:flex;align-items:center;gap:7px}
+.swatch{width:11px;height:11px;border-radius:2px;flex:none}
+.sw-c{background:var(--computed)}
+.sw-i{background:var(--input)}
+.sw-o{background:var(--open)}
+
+.caveat{
+  border-left:2px solid var(--open);
+  padding:2px 0 2px 16px;margin:24px 0 0;
+  color:var(--ink-2);font-size:16px;max-width:var(--measure);
+}
+.caveat strong{color:var(--ink);font-weight:600}
+
+figure{margin:30px 0 0}
+figure img{
+  width:100%;height:auto;display:block;
+  border:1px solid var(--rule-2);border-radius:3px;background:var(--paper);
+}
+figcaption{
+  font-size:14.5px;color:var(--ink-3);margin-top:11px;max-width:var(--measure);
+}
+figcaption b{font-weight:500;color:var(--ink-2)}
+
+footer{padding:40px 0 64px;color:var(--ink-3);font-size:14.5px;border-top:1px solid var(--rule)}
+footer p{max-width:var(--measure)}
+footer a{color:var(--ink-2)}
+
+@media (max-width:640px){
+  body{font-size:16px}
+  header.top{padding:40px 0 24px}
+  section{padding:34px 0}
+  .lede{font-size:17.5px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="top">
+  <p class="eyebrow"><a href="https://github.com/russnida-repo/Climate_Change_Workbook">russnida-repo / Climate_Change_Workbook</a></p>
+  <h1>Global temperature against CO<sub>2</sub>, with the natural variability controlled for</h1>
+  <p class="lede">
+    A spreadsheet analysis of 822 months of surface temperature against atmospheric
+    CO<sub>2</sub>, solar irradiance, ENSO and volcanic aerosol, built so that every
+    figure in it can be re-derived from the published data by someone who does not
+    trust it.
+  </p>
+  <ul class="facts">
+    <li><b>Version</b> 1.7.11</li>
+    <li><b>Record</b> Mar 1958 to Aug 2026</li>
+    <li><b>Worksheets</b> 22</li>
+    <li><b>Computed cells</b> 120,565</li>
+    <li><b>Reproduction scripts</b> 5</li>
+  </ul>
+</header>
+
+<section>
+  <h2>The result</h2>
+  <p class="sub">
+    Annual mean anomaly regressed on anthropogenic effective radiative forcing with
+    ENSO controlled, 1959 to 2025, then scaled by the forcing from doubled
+    CO<sub>2</sub>.
+  </p>
+
+  <div class="tbl">
+  <table>
+    <caption>Central estimate and the regression behind it.</caption>
+    <thead>
+      <tr><th scope="col">Quantity</th><th scope="col" class="num">Value</th><th scope="col">Units</th><th scope="col">Cell</th></tr>
+    </thead>
+    <tbody>
+      <tr class="hl">
+        <td>Response to anthropogenic forcing, <i>b</i></td>
+        <td class="num">0.4088</td><td class="q">°C per W/m²</td><td class="src">Forcing!T14</td>
+      </tr>
+      <tr class="hl">
+        <td>Scaled by F<sub>2×</sub> = 3.93 W/m²</td>
+        <td class="num">1.607</td><td class="q">°C per doubling</td><td class="src">Forcing!T17</td>
+      </tr>
+      <tr><td>R² of the fit</td><td class="num">0.9532</td><td class="q">67 years</td><td class="src">Forcing!T16</td></tr>
+      <tr><td>Lag-1 autocorrelation of residuals</td><td class="num">0.357</td><td class="q">annual</td><td class="src">Forcing!T18</td></tr>
+      <tr><td>Standard error of <i>b</i>, naive</td><td class="num">0.0115</td><td class="q">°C per W/m²</td><td class="src">Forcing!T19</td></tr>
+      <tr><td>Standard error of <i>b</i>, AR(1) adjusted</td><td class="num">0.0167</td><td class="q">°C per W/m²</td><td class="src">Forcing!U19</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="tbl">
+  <table>
+    <caption>Intervals widen as more sources of uncertainty are let in. The last row is the defensible one.</caption>
+    <thead>
+      <tr><th scope="col">What is included</th><th scope="col" class="num">Low</th><th scope="col" class="num">High</th><th scope="col">Level</th><th scope="col">Cell</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Regression uncertainty only, AR(1)</td><td class="num">1.48</td><td class="num">1.74</td><td class="q">95%</td><td class="src">Summary!B8</td></tr>
+      <tr><td>Plus F<sub>2×</sub> uncertainty</td><td class="num">1.34</td><td class="num">1.87</td><td class="q">95%</td><td class="src">Forcing!T43:U43</td></tr>
+      <tr class="hl"><td>Plus forcing uncertainty, Monte Carlo</td><td class="num">1.43</td><td class="num">1.78</td><td class="q">90%</td><td class="src">Sensitivity!AC46</td></tr>
+      <tr><td>The same draw, wider level</td><td class="num">1.39</td><td class="num">1.81</td><td class="q">95%</td><td class="src">Sensitivity!AD46</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="tbl">
+  <table>
+    <caption>Where the uncertainty comes from. The forcing term and F<sub>2×</sub> are the same physical quantity, so adding these in quadrature double counts; the Monte Carlo above ties them together instead.</caption>
+    <thead>
+      <tr><th scope="col">Source</th><th scope="col" class="num">Standard error</th><th scope="col">Cell</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Time series, regression noise</td><td class="num">0.066</td><td class="src">Sensitivity!AA47</td></tr>
+      <tr><td>F<sub>2×</sub>, the doubling forcing itself</td><td class="num">0.117</td><td class="src">Sensitivity!AA47</td></tr>
+      <tr><td>Non-CO<sub>2</sub> forcing components</td><td class="num">0.068</td><td class="src">Sensitivity!AA47</td></tr>
+      <tr><td>Total, in quadrature</td><td class="num">0.15</td><td class="src">Sensitivity!AC47</td></tr>
+      <tr><td class="open">ENSO index choice, ONI against RONI</td><td class="num open">+0.058</td><td class="src">Open Items</td></tr>
+      <tr class="note-row"><td colspan="3">
+        The last row is structural rather than statistical: it is the whole shift in the
+        headline from swapping one defensible ENSO control for another, and it sits
+        outside every interval above.
+      </td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <figure>
+    <picture>
+      <source srcset="figures/fig2-forcing-fit-dark.svg" media="(prefers-color-scheme: dark)">
+      <img src="figures/fig2-forcing-fit-light.svg" alt="Scatter plot of 67 annual mean temperature anomalies against anthropogenic effective radiative forcing, 1959 to 2025, rising from about minus 0.2 °C at 0.3 W/m² to about 1.2 °C at 3.1 W/m², with a fitted regression line of slope 0.4088 °C per W/m².">
+    </picture>
+    <figcaption>
+      The fit behind the headline. <b>Forcing!B2:B68</b> against
+      <b>Forcing!AN2:AN68</b>. Both axes are dominated by the shared trend, which is
+      why the detrended check in the workbook matters as much as the R².
+    </figcaption>
+  </figure>
+
+  <p class="caveat">
+    <strong>This is not TCR.</strong> It is a historical regression on a single
+    66-year realisation, scaled by F<sub>2×</sub>. The transient climate response is
+    defined by a 1%-per-year model experiment, which this is not. The number falls
+    inside the IPCC AR6 range, and that is a comparison, not a validation.
+  </p>
+</section>
+
+<section>
+  <h2>What each control buys</h2>
+  <p class="sub">
+    Monthly fits, each adding one natural-variability term. Read every row against the
+    same-months column rather than the row above, because the sample changes as series
+    with different coverage are added.
+  </p>
+
+  <figure>
+    <picture>
+      <source srcset="figures/fig1-controls-dark.svg" media="(prefers-color-scheme: dark)">
+      <img src="figures/fig1-controls-light.svg" alt="Horizontal bar chart of residual standard deviation for four monthly models: CO2 only 0.145 °C, plus ENSO 0.128, plus volcanic aerosol 0.122, exponential responses 0.119. R-squared rises from 0.861 to 0.904 across the same four.">
+    </picture>
+    <figcaption>
+      Residual spread, not R², because it has a meaningful zero and the bars are
+      therefore comparable by length. <b>Summary!M12:O15</b>.
+    </figcaption>
+  </figure>
+
+  <div class="tbl">
+  <table>
+    <caption>In-sample progression. Source: <span class="src">Summary!B11:K16</span>.</caption>
+    <thead>
+      <tr>
+        <th scope="col">Model</th>
+        <th scope="col" class="num">Months</th>
+        <th scope="col" class="num">CO₂, °C/doubling</th>
+        <th scope="col" class="num">R²</th>
+        <th scope="col" class="num">Previous, same months</th>
+        <th scope="col" class="num">Residual σ</th>
+        <th scope="col" class="num">Lag-1</th>
+        <th scope="col">Lag recovered</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>CO₂ only</td><td class="num">822</td><td class="num">2.734</td>
+        <td class="num">0.861</td><td class="num dash">—</td><td class="num">0.145</td>
+        <td class="num">0.644</td><td class="q dash">—</td>
+      </tr>
+      <tr>
+        <td>Plus ENSO, ONI at lag 3</td><td class="num">815</td><td class="num">2.747</td>
+        <td class="num">0.892</td><td class="num">0.861</td><td class="num">0.128</td>
+        <td class="num">0.547</td><td class="q">3 months</td>
+      </tr>
+      <tr>
+        <td>Plus volcanic aerosol, lag 7</td><td class="num">814</td><td class="num">2.727</td>
+        <td class="num">0.901</td><td class="num">0.891</td><td class="num">0.122</td>
+        <td class="num">0.503</td><td class="q">6 to 8 months</td>
+      </tr>
+      <tr>
+        <td>Plus solar irradiance, to 2023</td><td class="num">783</td><td class="num">2.644</td>
+        <td class="num">0.893</td><td class="num">0.890</td><td class="num dash">—</td>
+        <td class="num dash">—</td><td class="q">about 11 years</td>
+      </tr>
+      <tr class="hl">
+        <td>Exponential responses, not single lags</td><td class="num">807</td><td class="num">2.704</td>
+        <td class="num">0.904</td><td class="num">0.898</td><td class="num">0.119</td>
+        <td class="num">0.473</td><td class="q">τ: ENSO 6, aerosol 12</td>
+      </tr>
+      <tr class="note-row"><td colspan="8">
+        The CO₂ column is not on matched months. The solar row's 2.644 is a window
+        effect: CO₂ alone on those same 783 months is already 2.640
+        (<span class="src">Volcanic!N31</span>).
+      </td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="tbl">
+  <table>
+    <caption>Out-of-sample, blocked 7-fold cross-validation with the time constants and coefficients chosen out of fold. Judge the gain on this table, not on the in-sample one.</caption>
+    <thead>
+      <tr>
+        <th scope="col">Model</th>
+        <th scope="col" class="num">In-sample R²</th>
+        <th scope="col" class="num">Out-of-fold R²</th>
+        <th scope="col" class="num">Bias, °C</th>
+        <th scope="col">Cell</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>CO₂ only</td><td class="num">0.861</td><td class="num">0.838</td><td class="num dash">—</td><td class="src">Kernel!P69</td></tr>
+      <tr class="hl"><td>CO₂ plus ENSO plus aerosol, exponential</td><td class="num">0.904</td><td class="num">0.887</td><td class="num">0.003</td><td class="src">Kernel!P66:Q66</td></tr>
+      <tr><td>The same, τ fixed at 6 and 12</td><td class="num">0.904</td><td class="num">0.889</td><td class="num">0.003</td><td class="src">Kernel!P68:Q68</td></tr>
+      <tr class="note-row"><td colspan="5">
+        Pooled out-of-fold R² is dominated by the cross-decade trend, which a monotone
+        CO₂-only regressor extrapolates across blocks. Within every fold the CO₂-only
+        fit is near zero or negative R² while the three-factor model cuts the RMSE,
+        which is the stronger statement. <span class="src">Kernel!P69</span> differs
+        from the reproduction script by 0.006 with no recoverable provenance, and is
+        left on the record rather than reconciled.
+      </td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <h2>Every input, and what you may do with it</h2>
+  <p class="sub">
+    Fifteen datasets. The licence on this repository covers the workbook, the prose and
+    the scripts; it does not and cannot cover the inputs, most of which are United
+    States Government work in the public domain.
+  </p>
+
+  <div class="tbl">
+  <table>
+    <caption>Retrieval dates and terms as recorded on the <span class="src">Sources</span> tab, which is the authority.</caption>
+    <thead>
+      <tr>
+        <th scope="col" class="num">#</th>
+        <th scope="col">Dataset</th>
+        <th scope="col">Provider</th>
+        <th scope="col">Retrieved</th>
+        <th scope="col">Terms</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="num">1</td><td>Surface temperature, GISTEMP v4</td><td class="q">NASA GISS</td><td class="q">2026-09-21</td><td>US Government work, public domain; citation requested</td></tr>
+      <tr><td class="num">2</td><td>Atmospheric CO₂, Mauna Loa</td><td class="q">NOAA GML</td><td class="q">2026-09-21</td><td>Free; citation requested</td></tr>
+      <tr><td class="num">3</td><td>Solar irradiance, NRLTSI2</td><td class="q">LASP LISIRD</td><td class="q">2026-09-19</td><td>NOAA CDR use agreement; no restrictions on use</td></tr>
+      <tr><td class="num">4</td><td>Solar irradiance, Solar CDR v3</td><td class="q">NOAA NCEI</td><td class="q">2026-09-21</td><td>NOAA CDR use agreement; no restrictions on use</td></tr>
+      <tr><td class="num">5</td><td>ENSO, ONI on ERSSTv5</td><td class="q">NOAA CPC</td><td class="q">2026-09-19</td><td>US Government work, public domain</td></tr>
+      <tr><td class="num">6</td><td>ENSO, ONI on ERSSTv6</td><td class="q">NOAA CPC</td><td class="q">2026-09-21</td><td>US Government work, public domain</td></tr>
+      <tr><td class="num">7</td><td>Stratospheric aerosol and volcanic forcing</td><td class="q">ClimateIndicator</td><td class="q">2026-09-19</td><td><b>MIT Licence</b>, © 2023 Chris Smith; notices must travel with any copy</td></tr>
+      <tr><td class="num">8</td><td>Stratospheric aerosol, GloSSAC v2.24</td><td class="q">NASA GISS</td><td class="q">2026-09-21</td><td>NASA data, public domain; cite GloSSAC</td></tr>
+      <tr><td class="num">9</td><td>Effective radiative forcing, 61 components</td><td class="q">ClimateIndicator</td><td class="q">2026-09-19</td><td>As item 7</td></tr>
+      <tr><td class="num">10</td><td>Forcing uncertainty, 5th and 95th percentiles</td><td class="q">ClimateIndicator</td><td class="q">2026-09-21</td><td>As item 7</td></tr>
+      <tr><td class="num">11</td><td>Surface temperature, HadCRUT5</td><td class="q">Met Office Hadley Centre</td><td class="q">2026-09-21</td><td>Open Government Licence v3</td></tr>
+      <tr><td class="num">12</td><td>Surface temperature, Berkeley Earth</td><td class="q">Berkeley Earth</td><td class="q">2026-09-21</td><td>CC BY 4.0</td></tr>
+      <tr><td class="num">13</td><td>Top-of-atmosphere fluxes, CERES EBAF</td><td class="q">NASA LaRC ASDC</td><td class="q">2026-09-22</td><td>NASA data, openly available; citation requested</td></tr>
+      <tr><td class="num">14</td><td>Ocean heat content, 0 to 2000 m</td><td class="q">NOAA NCEI</td><td class="q">2026-09-22</td><td>US Government work, public domain; citation requested</td></tr>
+      <tr><td class="num">15</td><td>ENSO, RONI on ERSSTv5</td><td class="q">NOAA CPC</td><td class="q">2026-10-22</td><td>US Government work, public domain</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="caveat">
+    <strong>Three attributions survive reuse.</strong> The ClimateIndicator repository
+    is MIT, which requires the copyright and permission notices to accompany any copy,
+    a stricter form than a citation line. HadCRUT5 carries the Open Government Licence
+    and Berkeley Earth is CC BY 4.0. Reusing this repository does not discharge any of
+    them.
+  </p>
+
+  <ul class="key">
+    <li><span class="swatch sw-c" aria-hidden="true"></span>Computed outside the workbook and pasted</li>
+    <li><span class="swatch sw-i" aria-hidden="true"></span>Hand-maintained input</li>
+    <li><span class="swatch sw-o" aria-hidden="true"></span>Deliberately left open</li>
+  </ul>
+</section>
+
+<section>
+  <h2>How the forcing terms separate</h2>
+  <p class="sub">
+    Greenhouse-gas forcing trends upward across the whole record. Aerosol forcing does
+    not: it deepens into the 1980s and then recovers. That difference in shape is what
+    lets the regression tell the two apart.
+  </p>
+
+  <figure>
+    <picture>
+      <source srcset="figures/fig3-erf-components-dark.svg" media="(prefers-color-scheme: dark)">
+      <img src="figures/fig3-erf-components-light.svg" alt="Three lines from 1959 to 2025. Greenhouse-gas forcing rises steadily from 1.1 to 3.6 W/m². Anthropogenic total rises from 0.3 to 3.1. Aerosol forcing sits near minus 1, deepening to about minus 1.45 around 1985 and recovering to minus 0.96 by 2025.">
+    </picture>
+    <figcaption>
+      The correlation between the two over 1959 to 2025 is −0.002, close to orthogonal,
+      so the split is identified. What is not identified is the aerosol response per
+      W/m², because the aerosol magnitude is itself uncertain by a factor of four.
+      <b>Forcing!K, I and L</b>.
+    </figcaption>
+  </figure>
+
+  <figure>
+    <picture>
+      <source srcset="figures/fig4-attribution-dark.svg" media="(prefers-color-scheme: dark)">
+      <img src="figures/fig4-attribution-light.svg" alt="Horizontal bars of fitted warming since 1959 at 2025: CO2 plus 0.683 °C, other greenhouse gases plus 0.336, ozone and land use and other plus 0.145, aerosols minus 0.020. The four sum to 1.144 °C against 1.163 °C observed.">
+    </picture>
+    <figcaption>
+      The four components sum to 1.144 °C against 1.163 °C observed over the same span.
+      Aerosols net to roughly zero over this window because the forcing recovered almost
+      as much as it deepened, which is a statement about 1959 to 2025 and not about
+      aerosols in general. <b>Forcing!BB68:BE68</b>.
+    </figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>What is left over</h2>
+  <p class="sub">
+    The workbook does not close the gap between the model and the last three years, and
+    it does not pretend to. The leading candidate was tested and rejected.
+  </p>
+
+  <figure>
+    <picture>
+      <source srcset="figures/fig5-residual-dark.svg" media="(prefers-color-scheme: dark)">
+      <img src="figures/fig5-residual-light.svg" alt="Monthly residual from the exponential-response model, 1958 to 2025, oscillating between about minus 0.4 and plus 0.45 °C around zero. The 2023 to 2025 segment is highlighted and sits mostly above zero, averaging plus 0.16 °C.">
+    </picture>
+    <figcaption>
+      Residual from the exponential-response model. The recent excess averages
+      +0.16 °C, which is about one standard error of a three-year mean.
+      <b>Kernel!M9:M815</b>.
+    </figcaption>
+  </figure>
+
+  <p class="caveat">
+    <strong>The obvious explanation does not work.</strong> The CERES reflected-shortwave
+    decline over 2023 to 2025 would imply +0.53 °C at the fitted response, roughly eight
+    times the residual it is meant to explain and 1.5 times the entire change in total
+    forcing across the same windows. A top-of-atmosphere flux change mixes forced change,
+    feedback to warming and internal variability, and the regression's own coefficient
+    already contains whatever part of it is feedback. It is left unexplained.
+  </p>
+</section>
+
+<footer>
+  <p>
+    Workbook and prose CC BY 4.0. The five reproduction scripts are MIT. Input datasets
+    keep their own terms, recorded on the <span class="src">Sources</span> tab and in
+    <span class="src">LICENSE-CONTENT.md</span>. Maintained by Russ Nida.
+  </p>
+  <p>
+    Suggested citation: Nida, R. (2026). <i>Climate_Change_Analysis_2</i>: global
+    temperature against CO₂ with natural-variability controls. Version 1.7.11.
+  </p>
+</footer>
+
+</div>
+</body>
+</html>

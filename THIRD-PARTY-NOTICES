@@ -1,0 +1,102 @@
+THIRD-PARTY NOTICES
+===================
+
+This repository incorporates data produced by third parties. Notices that must
+travel with copies are reproduced below in full. The workbook's Sources tab,
+column K, is the authoritative per-item record; section F of that tab summarises
+the obligations that survive onward reuse.
+
+
+1. ClimateIndicator / forcing-timeseries
+----------------------------------------
+
+Used for: Sources items 7, 9 and 10. Stratospheric aerosol optical depth and
+volcanic effective radiative forcing, the annual 61-component ERF series, and
+its 5th and 95th percentile series. Files ERF_best_aggregates.csv,
+ERF_p05_aggregates.csv and ERF_p95_aggregates.csv in erf_inputs/.
+
+Source: https://github.com/ClimateIndicator/forcing-timeseries
+Verified at commit 852f4f7b0733fa4d573c145cdfaf556da5589231, which is the commit
+these files were taken from. The notice below is that commit's LICENSE verbatim.
+
+    MIT License
+
+    Copyright (c) 2023 Chris Smith
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+Please also cite the accompanying paper, as recorded at Sources!L13:
+
+    Forster, P.M. et al. (2026), Indicators of Global Climate Change 2025:
+    annual update of key indicators of the state of the climate system and
+    human influence, Earth System Science Data 18(6), 3889-3933,
+    doi:10.5194/essd-18-3889-2026, published 11 June 2026.
+    Verified against Crossref 2026-10-23.
+
+The repository's own data deposit is doi:10.5281/zenodo.10706344.
+
+Note on the 2025 values. The repository README at commit 852f4f7 warns that its
+2025 data is preliminary. That text is stale: it was added on 2026-03-24 and the
+README has not been touched since, while the output files were revised on
+2026-05-29 and 2026-06-08. The shipped values match the published paper's
+headline figures exactly at its precision, so they are the final assessment.
+Sources!L13 in the workbook carries the comparison.
+
+
+2. HadCRUT5
+-----------
+
+Used for: Sources item 11, a robustness check on the Sensitivity tab.
+Terms: Open Government Licence v3, which permits copying and adaptation with
+attribution of source and licence.
+Source: Met Office Hadley Centre / Climatic Research Unit.
+
+
+3. Berkeley Earth
+-----------------
+
+Used for: Sources item 12, a robustness check on the Sensitivity tab.
+Terms: CC BY 4.0, satisfied by attribution.
+
+
+4. United States Government data
+--------------------------------
+
+Sources items 1, 2, 5, 6, 8 and 15 are United States Government or NASA
+material. Most is public domain and cannot be placed under any licence, but
+citation is requested: NASA for GISTEMP and GloSSAC, NOAA GML for the Mauna Loa
+CO2 record. Item 15, the RONI series, carried an open question about citation; resolved in
+v1.7.10, CPC requests none. The series ships with this package as
+RONI.v5.ascii.txt, checksummed in the manifest.
+
+Items 3 and 4, the two total solar irradiance series, are governed by the NOAA
+Climate Data Record use agreement. Resolved in v1.7.11 against the agency's own
+document, UseAgreement_01B-32.pdf, "Fair Use of NOAA's CDR Data Sets, Algorithms
+and Documentation", which states that "the CDR data sets are non-proprietary,
+publicly available, and no restrictions are placed upon their use". Citation and
+acknowledgement are urged rather than required and there is no notification
+requirement, so redistributing these values is permitted. The one carve-out is
+the CDR production software, which that document places outside the Open Data
+policies and which this package does not ship.
+
+Items 13 and 14, CERES EBAF and the NCEI ocean heat content series, had no terms,
+location or citation recorded at all until v1.7.11. All three are now recorded:
+NASA data openly available with citation requested for CERES, cite Loeb et al.
+(2018); US Government work in the public domain with citation requested for the
+NCEI series, cite Levitus et al. (2012).

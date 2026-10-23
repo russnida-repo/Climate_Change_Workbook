@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+recalc/
+roni_row_map.json
+.DS_Store
